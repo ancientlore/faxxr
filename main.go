@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"time"
 
 	"github.com/facebookgo/flagenv"
@@ -36,11 +37,15 @@ var (
 		},
 		Timeout: 10 * time.Second,
 	}
+
+	config sync.Map
 )
 
 func main() {
 	flag.Parse()
 	flagenv.Parse()
+
+	config.Store("fax", "disable")
 
 	twilioClient = &twilio{
 		AccountSID: *flagSID,
@@ -57,6 +62,7 @@ func main() {
 
 	// log status callbacks
 	http.HandleFunc("/smsStatus", smsStatusCallback)
+	http.HandleFunc("/smsReceive", smsReceive)
 
 	server := &http.Server{
 		Addr:         *flagAddr,
