@@ -3,10 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 )
 
@@ -58,16 +58,19 @@ func (client *twilio) sendSMS(to, body, mediaURL string) error {
 	return nil
 }
 
-func logSmsStatus(v url.Values) {
-	to := v.Get("To")
-	from := v.Get("From")
-	messageStatus := v.Get("MessageStatus")
-	errorCode, _ := strconv.Atoi(v.Get("ErrorCode"))
-	log.Printf("Message from %q to %q: %d %s", from, to, errorCode, messageStatus)
+func logSmsStatus(r io.Reader) {
+	var data map[string]interface{}
+	decoder := json.NewDecoder(r)
+	err := decoder.Decode(&data)
+	if err != nil {
+		log.Print("Unable to decode JSON: ", err)
+		return
+	}
+	log.Printf("Message from %q to %q: %v %v %v", data["from"], data["to"], data["error_code"], data["status"], data)
 }
 
 func smsStatusCallback(w http.ResponseWriter, r *http.Request) {
-	logSmsStatus(r.Form)
+	logSmsStatus(r.Body)
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte("OK"))
 }
