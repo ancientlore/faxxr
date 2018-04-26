@@ -27,12 +27,14 @@ func smsReceive(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	logSmsStatus(r.PostForm)
 
 	msg := ""
-	switch strings.Replace(strings.ToLower(strings.TrimSpace(r.PostForm.Get("Body"))), " ", " ", -1) {
-	case "help":
+	switch strings.Replace(strings.ToLower(r.PostForm.Get("Body")), " ", "", -1) {
+	case "help", "options":
 		msg = `faxxr options are:
 help
+options
 settings
 fax enable
 fax disable`
@@ -42,20 +44,22 @@ fax disable`
 			msg += "\n" + k.(string) + " = " + v.(string)
 			return true
 		})
-	case "fax enable":
+	case "faxenable":
 		config.Store("fax", "enable")
 		msg = "Fax enabled."
-	case "fax disable":
+	case "faxdisable":
 		config.Store("fax", "disable")
 		msg = "Fax disabled."
 	default:
 		msgs := []string{
 			"Say what?",
 			"I don't understand.",
-			"Try \"help\" to see what I can do.",
 			"That's not something I can do.",
 			"Maybe you should try Google.",
+			"My vocabulary is limited.",
+			"It's all Greek to me.",
 		}
+		msg += " Try \"help\" or \"options\" to see what I can do."
 		msg = msgs[rand.Intn(len(msgs))]
 	}
 
