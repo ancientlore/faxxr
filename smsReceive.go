@@ -59,8 +59,8 @@ fax disable`
 			"My vocabulary is limited.",
 			"It's all Greek to me.",
 		}
-		msg += " Try \"help\" or \"options\" to see what I can do."
 		msg = msgs[rand.Intn(len(msgs))]
+		msg += " Try \"help\" or \"options\" to see what I can do."
 	}
 
 	w.Header().Set("Content-Type", "application/xml")
