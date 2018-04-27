@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
@@ -45,7 +46,10 @@ func main() {
 	flag.Parse()
 	flagenv.Parse()
 
+	rand.Seed(time.Now().UnixNano())
+
 	config.Store("fax", "disable")
+	config.Store("notify", "on")
 
 	twilioClient = &twilio{
 		AccountSID: *flagSID,

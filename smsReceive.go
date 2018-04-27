@@ -32,24 +32,30 @@ func smsReceive(w http.ResponseWriter, r *http.Request) {
 	msg := ""
 	switch strings.Replace(strings.ToLower(r.PostForm.Get("Body")), " ", "", -1) {
 	case "help", "options":
-		msg = `faxxr options are:
+		msg = `Msg&Data rates may apply. faxxr options are:
 help
 options
 settings
-fax enable
-fax disable`
+fax enable|disable
+notify on|off`
 	case "settings":
 		msg += "faxxr settings:"
 		config.Range(func(k, v interface{}) bool {
 			msg += "\n" + k.(string) + " = " + v.(string)
 			return true
 		})
-	case "faxenable":
+	case "faxenable", "faxon":
 		config.Store("fax", "enable")
-		msg = "Fax enabled."
-	case "faxdisable":
+		msg = "Receiving faxes enabled."
+	case "faxdisable", "faxoff":
 		config.Store("fax", "disable")
-		msg = "Fax disabled."
+		msg = "Receiving faxes disabled."
+	case "notifyenable", "notifyon":
+		config.Store("notify", "on")
+		msg = "Fax notifications enabled."
+	case "notifydisable", "notifyoff":
+		config.Store("notify", "off")
+		msg = "Fax notifications disabled."
 	default:
 		msgs := []string{
 			"Say what?",
@@ -58,6 +64,13 @@ fax disable`
 			"Maybe you should try Google.",
 			"My vocabulary is limited.",
 			"It's all Greek to me.",
+			"You're not speaking my language.",
+			"I'm sorry Dave; I can't do that.",
+			"You're not the boss of me!",
+			"Sorry, I didn't hear you.",
+			"Perhasp you mistpyed that?",
+			"I'm not Siri.",
+			"My name isn't Alexa.",
 		}
 		msg = msgs[rand.Intn(len(msgs))]
 		msg += " Try \"help\" or \"options\" to see what I can do."
