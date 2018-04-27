@@ -63,7 +63,7 @@ func logSmsStatus(v url.Values) {
 	from := v.Get("From")
 	messageStatus := v.Get("MessageStatus")
 	errorCode, _ := strconv.Atoi(v.Get("ErrorCode"))
-	log.Printf("Message from %q to %q: %d %s", from, to, errorCode, messageStatus)
+	log.Printf("Message from %q to %q: %d %s %v", from, to, errorCode, messageStatus, v.Encode())
 }
 
 func smsStatusCallback(w http.ResponseWriter, r *http.Request) {

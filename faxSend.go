@@ -64,7 +64,7 @@ func logFaxStatus(v url.Values) {
 	from := v.Get("From")
 	messageStatus := v.Get("MessageStatus")
 	errorCode, _ := strconv.Atoi(v.Get("ErrorCode"))
-	log.Printf("Fax from %q to %q: %d %s", from, to, errorCode, messageStatus)
+	log.Printf("Fax from %q to %q: %d %s", from, to, errorCode, messageStatus, v.Encode())
 }
 
 func faxStatusCallback(w http.ResponseWriter, r *http.Request) {
