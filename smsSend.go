@@ -62,8 +62,25 @@ func logSmsStatus(v url.Values) {
 	to := v.Get("To")
 	from := v.Get("From")
 	messageStatus := v.Get("MessageStatus")
+	if messageStatus == "" {
+		messageStatus = v.Get("SmsStatus")
+	}
+	where := ""
+	if v.Get("FromCity") != "" {
+		where = " " + v.Get("FromCity")
+	}
+	if v.Get("FromState") != "" {
+		where += " " + v.Get("FromState")
+	}
+	if v.Get("FromZip") != "" {
+		where += " " + v.Get("FromZip")
+	}
+	if v.Get("FromCountry") != "" {
+		where += " " + v.Get("FromCountry")
+	}
+
 	errorCode, _ := strconv.Atoi(v.Get("ErrorCode"))
-	log.Printf("Message from %q to %q: %d %s %v", from, to, errorCode, messageStatus, v.Encode())
+	log.Printf("Message from %q%s to %q: %d %s", from, where, to, errorCode, messageStatus)
 }
 
 func smsStatusCallback(w http.ResponseWriter, r *http.Request) {
