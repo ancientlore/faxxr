@@ -112,7 +112,7 @@ func main() {
 
 func doStuff(c *twilio) {
 	time.Sleep(2 * time.Second)
-	err := c.sendSMS(*flagTo, "This is a test message.", "")
+	err := c.sendSMS(*flagTo, "This is a test message. これはテストメッセージです。", "")
 	if err != nil {
 		log.Print(err)
 	}
