@@ -120,4 +120,15 @@ func doStuff(c *twilio) {
 	if err != nil {
 		log.Print(err)
 	}
+
+	faxCover(".", &faxCoverDetails{
+		FromPhone: *flagFrom,
+		FromName:  "Michael Lore",
+		FromAddr1: "1435 Towlston Road",
+		FromAddr2: "Vienna, VA 22182",
+		ToPhone:   *flagTo,
+		ToName:    "Ancient Lore",
+		Subject:   "Interesting information",
+		Text:      "Please look at this fax. This is some interesting stuff. I promise you will want to read it.\n\nSeriously, look at it!",
+	})
 }
