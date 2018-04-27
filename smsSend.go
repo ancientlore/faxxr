@@ -11,7 +11,7 @@ import (
 )
 
 func (client *twilio) sendSMS(to, body, mediaURL string) error {
-	turl := twilioURL + client.AccountSID + "/Messages.json"
+	turl := twilioSMSURL + client.AccountSID + "/Messages.json"
 
 	msgData := url.Values{}
 	msgData.Set("To", to)

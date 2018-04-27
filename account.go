@@ -3,7 +3,7 @@ package main
 import "net/http"
 
 const (
-	twilioURL = "https://api.twilio.com/2010-04-01/Accounts/"
+	twilioSMSURL = "https://api.twilio.com/2010-04-01/Accounts/"
 )
 
 type smsConfig struct {
