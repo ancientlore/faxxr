@@ -54,15 +54,20 @@ func main() {
 		sms: smsConfig{
 			From: *flagFrom,
 		},
+		fax: faxConfig{
+			From: *flagFrom,
+		},
 	}
 
 	if *flagCallback != "" {
 		twilioClient.sms.StatusCallbackURL = *flagCallback + "/smsStatus"
+		twilioClient.fax.StatusCallbackURL = *flagCallback + "/faxStatus"
 	}
 
-	// log status callbacks
+	// callbacks
 	http.HandleFunc("/smsStatus", smsStatusCallback)
 	http.HandleFunc("/smsReceive", smsReceive)
+	http.HandleFunc("/faxStatus", faxStatusCallback)
 
 	server := &http.Server{
 		Addr:         *flagAddr,

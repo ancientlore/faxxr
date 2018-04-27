@@ -4,6 +4,7 @@ import "net/http"
 
 const (
 	twilioSMSURL = "https://api.twilio.com/2010-04-01/Accounts/"
+	twilioFaxURL = "https://fax.twilio.com/v1/Faxes"
 )
 
 type smsConfig struct {
@@ -15,6 +16,14 @@ type smsConfig struct {
 }
 
 type faxConfig struct {
+	// From phone number
+	From string
+
+	// Status callback URL
+	StatusCallbackURL string
+
+	// Whether to store sent media
+	StoreMedia bool
 }
 
 // twilio is a Twilio client.
