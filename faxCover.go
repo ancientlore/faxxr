@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/hhrutter/pdfcpu"
 	"github.com/hhrutter/pdfcpu/types"
@@ -40,8 +41,10 @@ func faxCover(tmpDir string, details *faxCoverDetails) (string, error) {
 	pdf.AddPage()
 	pdf.SetMargins(72, 72, 72)
 	pdf.SetY(76)
+
 	faxText(pdf, " FAX", true, 32)
-	faxText(pdf, "FROM:", false, 12)
+	faxText(pdf, time.Now().Format(time.RFC850), false, 10)
+	faxText(pdf, "\nFROM:", false, 12)
 	faxText(pdf, details.FromName, true, 16)
 	if details.FromAddr1 != "" {
 		faxText(pdf, details.FromAddr1, false, 14)
