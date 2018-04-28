@@ -59,7 +59,7 @@ func faxCover(tmpDir string, details *faxCoverDetails) (string, error) {
 		faxText(pdf, details.Text, false, 14)
 	}
 	faxText(pdf, "\n~ Sent by github.com/ancientlore/faxxr ~", false, 8)
-	pdf.Image("m.png", 7*72, 76, 32, 32, false, "", 0, "")
+	pdf.Image("media/m.png", 7*72, 76, 32, 32, false, "", 0, "")
 	pdf.Rect(72, 72, 6.5*72, 36, "D")
 
 	fileStr := filepath.Join(tmpDir, uuid.NewV4().String()+".pdf")

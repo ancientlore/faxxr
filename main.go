@@ -71,6 +71,7 @@ func main() {
 	// web site
 	http.HandleFunc("/", home)
 	http.HandleFunc("/sendFax", sendFax)
+	http.Handle("/media/", http.StripPrefix("/media/", http.FileServer(http.Dir("media"))))
 
 	// callbacks
 	http.HandleFunc("/smsStatus", smsStatusCallback)

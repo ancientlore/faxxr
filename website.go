@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	templates = template.Must(template.ParseGlob("*.html"))
+	templates = template.Must(template.ParseGlob("media/*.html"))
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
