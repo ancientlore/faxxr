@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+		<title>faxxr</title>
+
+		<link rel="icon" type="image/png" href="media/favicon-32x32.png" sizes="32x32" />
+		<link rel="icon" type="image/png" href="media/favicon-16x16.png" sizes="16x16" />
+
+		<!-- Bootstrap -->
+		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+
+		<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+		<!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+			<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+		<script src="https://use.typekit.net/ozy1gjf.js"></script>
+		<script>try{Typekit.load({ async: true });}catch(e){}</script>
+
+		<style type="text/css">
+		body {
+			color: #361c01;
+			background-color: #fff2e4;
+		}
+		a:link {
+			color: #ed7205;
+		}
+		a:visited {
+			color: #ed7205;
+		}
+		a:hover {
+			color: #ed9805;
+		}
+		a:active {
+			color: #ed9805;
+		}
+		h1 {
+  			font-family: "copal-std-decorated";
+  		}
+  		h2 {
+ 			font-family: "copal-std-decorated";
+ 			color: #361c01;
+ 		}
+ 		div.jumbotron {
+ 			background: url("media/clouds.png") repeat;
+ 			color: #fadabe;
+ 		}
+ 		</style>
+
+ 		<script src="https://apis.google.com/js/platform.js"></script>
+ 	</head>
+	<body>
+		<div class="jumbotron">
+			<div class="container">
+				<div class="row">
+					<div class="col-xs-2"><h1><img src="/m.png"></h1></div>
+					<div class="col-xs-10"><h1>faxxr</h1><p>Send and receive faxes online</p></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="container">
+			<div class="row">
+                <div class="col-xs-12">
+                    <h2>Send a fax</h2>
+                    <p>Your cell number will be used to validate your request. Only validated number are allowed.</p>
+                </div>
+            </div>
+            <form id="send" name="send" action="/sendFax" method="POST" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <h3>From</h3>
+                        <label for="fromName">Name</label><br/>
+                        <input type="text" id="fromName" name="fromName"></input>
+                        <br/>
+                        <label for="fromPhone">Cell number (formated like +17032223333)</label><br/>
+                        <input type="tel" id="fromPhone" name="fromPhone" required></input>
+                        <br/>
+                        <label for="fromAddr1">Address 1</label><br/>
+                        <input type="text" id="fromAddr1" name="fromAddr1"></input>
+                        <br/>
+                        <label for="fromAddr2">Address 2</label><br/>
+                        <input type="text" id="fromAddr2" name="fromAddr2"></input>
+                    </div>
+                    <div class="col-xs-3">
+                        <h3>To</h3>
+                        <label for="toName">Name</label><br/>
+                        <input type="text" id="toName" name="toName"></input>
+                        <br/>
+                        <label for="toPhone">Fax number (formated like +17032223333)</label><br/>
+                        <input type="tel" id="toPhone" name="toPhone" required></input>
+                        <h3>PDF File</h3>
+                        <label for="mediaFile">Choose file</label><br/>
+                        <input type="file" id="mediaFile" name="mediaFile" accept="application/pdf" required></input>
+                    </div>
+                    <div class="col-xs-6">
+                        <h3>Message</h3>
+                        <label for="subject">Subject</label><br/>
+                        <input type="text" id="subject" name="subject"></input>
+                        <br/>
+                        <label for="text">Text</label><br/>
+                        <textarea id="text" name="text" rows="4" columns="60"></textarea>
+                        <br/>
+                        <input type="submit" value="Send my fax!"></input>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-11">
+                    </div>
+                    <div class="col-xs-1">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<!-- Include all compiled plugins (below), or include individual files as needed -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+	</body>
+</html>

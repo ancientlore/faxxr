@@ -68,6 +68,10 @@ func main() {
 		twilioClient.fax.StatusCallbackURL = *flagCallback + "/faxStatus"
 	}
 
+	// web site
+	http.HandleFunc("/", home)
+	http.HandleFunc("/sendFax", sendFax)
+
 	// callbacks
 	http.HandleFunc("/smsStatus", smsStatusCallback)
 	http.HandleFunc("/smsReceive", smsReceive)
@@ -116,19 +120,21 @@ func main() {
 
 func doStuff(c *twilio) {
 	time.Sleep(2 * time.Second)
-	err := c.sendSMS(*flagTo, "This is a test message. これはテストメッセージです。", "")
-	if err != nil {
-		log.Print(err)
-	}
+	/*
+		err := c.sendSMS(*flagTo, "This is a test message. これはテストメッセージです。", "")
+		if err != nil {
+			log.Print(err)
+		}
 
-	faxCover(".", &faxCoverDetails{
-		FromPhone: *flagFrom,
-		FromName:  "Michael Lore",
-		FromAddr1: "1435 Towlston Road",
-		FromAddr2: "Vienna, VA 22182",
-		ToPhone:   *flagTo,
-		ToName:    "Ancient Lore",
-		Subject:   "Interesting information",
-		Text:      "Please look at this fax. This is some interesting stuff. I promise you will want to read it.\n\nSeriously, look at it!",
-	})
+		faxCover(".", &faxCoverDetails{
+			FromPhone: *flagFrom,
+			FromName:  "Michael Lore",
+			FromAddr1: "1435 Towlston Road",
+			FromAddr2: "Vienna, VA 22182",
+			ToPhone:   *flagTo,
+			ToName:    "Ancient Lore",
+			Subject:   "Interesting information",
+			Text:      "Please look at this fax. This is some interesting stuff. I promise you will want to read it.\n\nSeriously, look at it!",
+		})
+	*/
 }

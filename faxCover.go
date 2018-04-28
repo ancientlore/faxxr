@@ -1,8 +1,12 @@
 package main
 
 import (
+	"log"
+	"os"
 	"path/filepath"
 
+	"github.com/hhrutter/pdfcpu"
+	"github.com/hhrutter/pdfcpu/types"
 	"github.com/jung-kurt/gofpdf"
 	"github.com/myesui/uuid"
 )
@@ -63,6 +67,15 @@ func faxCover(tmpDir string, details *faxCoverDetails) (string, error) {
 	return fileStr, err
 }
 
-func mergePdfs(files []string) (string, error) {
-	return "", nil
+func mergePdfs(tmpDir string, files []string) (string, error) {
+	outfile := filepath.Join(tmpDir, uuid.NewV4().String()+".pdf")
+	_, err := pdfcpu.Process(pdfcpu.MergeCommand(files, outfile, types.NewDefaultConfiguration()))
+	// delete old files
+	for _, f := range files {
+		err2 := os.Remove(f)
+		if err2 != nil {
+			log.Print(err2)
+		}
+	}
+	return outfile, err
 }
