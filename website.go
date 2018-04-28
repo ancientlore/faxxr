@@ -59,7 +59,7 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 	}
 	f, hdr, err := r.FormFile("mediaFile")
 	defer f.Close()
-	fn := filepath.Join("", uuid.NewV4().String()+".pdf")
+	fn := filepath.Join("tmp", uuid.NewV4().String()+".pdf")
 	destf, err := os.Create(fn)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -74,14 +74,14 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 	}
 	destf.Close()
 
-	cover, err := faxCover("", &info)
+	cover, err := faxCover("tmp", &info)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		os.Remove(fn)
 		return
 	}
 
-	finalPdf, err := mergePdfs(".", []string{cover, fn})
+	finalPdf, err := mergePdfs("tmp", []string{cover, fn})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
