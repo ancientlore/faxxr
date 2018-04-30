@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func (client *twilio) sendFax(to, mediaURL, quality string) error {
+func (client *twilio) sendFax(to, mediaURL, quality string) (string, error) {
 	turl := twilioFaxURL
 
 	msgData := url.Values{}
@@ -41,7 +41,7 @@ func (client *twilio) sendFax(to, mediaURL, quality string) error {
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer resp.Body.Close()
 	var data map[string]interface{}
@@ -49,17 +49,17 @@ func (client *twilio) sendFax(to, mediaURL, quality string) error {
 	err = decoder.Decode(&data)
 	if err != nil {
 		log.Print("Unable to decode JSON response: ", err)
-		return err
+		return "", err
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		err = fmt.Errorf("Fax from %q to %q: Send: HTTP %d: %v %v", client.sms.From, to, resp.StatusCode, data["code"], data["message"])
-		return err
+		return "", err
 	}
 
 	log.Printf("Fax from %q to %q: %v", client.sms.From, to, data["status"])
-
-	return nil
+	log.Print(data)
+	return fmt.Sprint(data["faxSid"]), nil
 }
 
 func logFaxStatus(v url.Values) {
@@ -67,7 +67,8 @@ func logFaxStatus(v url.Values) {
 	from := v.Get("From")
 	messageStatus := v.Get("MessageStatus")
 	errorCode, _ := strconv.Atoi(v.Get("ErrorCode"))
-	log.Printf("Fax from %q to %q: %d %s %v", from, to, errorCode, messageStatus, v.Encode())
+	errorMessage := v.Get("ErrorMessage")
+	log.Printf("Fax from %q to %q: %d %s %v %v", from, to, errorCode, messageStatus, errorMessage, v.Encode())
 }
 
 func faxStatusCallback(w http.ResponseWriter, r *http.Request) {
@@ -103,10 +104,11 @@ func (client *twilio) faxLoop(ctx context.Context) {
 		case number := <-client.fax.approvalQueue:
 			details, ok := outgoing[number]
 			if ok {
-				err := client.sendFax(details.ToPhone, client.fax.MediaURL+details.pdfFile, details.Quality)
+				sid, err := client.sendFax(details.ToPhone, client.fax.MediaURL+details.pdfFile, details.Quality)
 				if err != nil {
 					log.Print("faxLoop: ", err)
 				}
+				details.faxSID = sid
 			}
 			// TODO: we leave it in the map for now - based on status we need to delete it
 		}

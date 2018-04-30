@@ -97,7 +97,7 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	info.pdfFile = strings.TrimPrefix("tmp/", finalPdf)
+	info.pdfFile = strings.TrimPrefix(finalPdf, "tmp/")
 
 	twilioClient.fax.faxQueue <- &info
 
