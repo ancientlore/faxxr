@@ -60,7 +60,7 @@ func (client *twilio) sendFax(to, mediaURL, quality string) (string, error) {
 	}
 
 	log.Printf("Fax from %q to %q: %v", client.sms.From, to, data["status"])
-	log.Print(data)
+	//log.Print(data)
 	return fmt.Sprint(data["sid"]), nil
 }
 
@@ -70,7 +70,7 @@ func logFaxStatus(v url.Values) {
 	messageStatus := v.Get("MessageStatus")
 	errorCode, _ := strconv.Atoi(v.Get("ErrorCode"))
 	errorMessage := v.Get("ErrorMessage")
-	log.Printf("Fax from %q to %q: %d %s %v %v", from, to, errorCode, messageStatus, errorMessage, v.Encode())
+	log.Printf("Fax from %q to %q: %d %s %v", from, to, errorCode, messageStatus, errorMessage)
 }
 
 func faxStatusCallback(w http.ResponseWriter, r *http.Request) {
