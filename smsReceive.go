@@ -79,7 +79,7 @@ notify on|off`
 		msg += " Try \"help\" or \"options\" to see what I can do."
 	}
 
-	if !twilioClient.isWhitelisted(r.PostForm.Get("from")) {
+	if !twilioClient.isWhitelisted(r.PostForm.Get("From")) {
 		msg = "Msg&Data rates may apply."
 	}
 
