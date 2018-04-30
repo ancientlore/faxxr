@@ -8,9 +8,11 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func (client *twilio) sendFax(to, mediaURL, quality string) (string, error) {
@@ -59,7 +61,7 @@ func (client *twilio) sendFax(to, mediaURL, quality string) (string, error) {
 
 	log.Printf("Fax from %q to %q: %v", client.sms.From, to, data["status"])
 	log.Print(data)
-	return fmt.Sprint(data["faxSid"]), nil
+	return fmt.Sprint(data["sid"]), nil
 }
 
 func logFaxStatus(v url.Values) {
@@ -77,16 +79,17 @@ func faxStatusCallback(w http.ResponseWriter, r *http.Request) {
 		log.Print("Unable to parse form: ", err)
 	} else {
 		logFaxStatus(r.PostForm)
-		/*
-			to := r.PostForm.Get("To")
-			from := r.PostForm.Get("From")
-			messageStatus := r.PostForm.Get("MessageStatus")
-			errorCode, _ := strconv.Atoi(r.PostForm.Get("ErrorCode"))
-			err = twilioClient.sendSMS(from, fmt.Sprintf("Fax to %q: %d %v", to, errorCode, messageStatus), "")
-			if err != nil {
-				log.Print("Unable to send SMS notification: ", err)
-			}
-		*/
+		sid := r.PostForm.Get("FaxSid")
+		to := r.PostForm.Get("To")
+		faxStatus := r.PostForm.Get("FaxStatus")
+		pages, _ := strconv.Atoi(r.PostForm.Get("NumPages"))
+		errorCode, _ := strconv.Atoi(r.PostForm.Get("ErrorCode"))
+		errorMsg := r.PostForm.Get("ErrorMessage")
+		msg := fmt.Sprintf("%s|Fax to %q: %v (%d pages)", sid, to, faxStatus, pages)
+		if errorCode != 0 || errorMsg != "" {
+			msg += fmt.Sprintf(" %d %v", errorCode, errorMsg)
+		}
+		twilioClient.fax.statusQueue <- msg
 	}
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte("OK"))
@@ -95,6 +98,8 @@ func faxStatusCallback(w http.ResponseWriter, r *http.Request) {
 func (client *twilio) faxLoop(ctx context.Context) {
 	done := ctx.Done()
 	outgoing := make(map[string]*faxCoverDetails)
+	ticker := time.NewTicker(1 * time.Minute)
+	defer ticker.Stop()
 	for {
 		select {
 		case <-done:
@@ -111,6 +116,28 @@ func (client *twilio) faxLoop(ctx context.Context) {
 				details.faxSID = sid
 			}
 			// TODO: we leave it in the map for now - based on status we need to delete it
+		case sidMsg := <-client.fax.statusQueue:
+			if sidMsg != "" {
+				for _, details := range outgoing {
+					if strings.HasPrefix(sidMsg, details.faxSID) {
+						err := client.sendSMS(details.FromPhone, sidMsg[len(details.faxSID)+1:], "")
+						if err != nil {
+							log.Print("faxLoop: ", err)
+						}
+						break
+					}
+				}
+			}
+		case <-ticker.C:
+			for k, details := range outgoing {
+				if time.Since(details.created) > 30*time.Minute {
+					err := os.Remove("tmp/" + details.pdfFile)
+					if err != nil {
+						log.Print("faxLoop: ", err)
+					}
+					delete(outgoing, k)
+				}
+			}
 		}
 	}
 }

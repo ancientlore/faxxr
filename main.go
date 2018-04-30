@@ -62,6 +62,7 @@ func main() {
 			From:          *flagFrom,
 			faxQueue:      make(chan *faxCoverDetails),
 			approvalQueue: make(chan string),
+			statusQueue:   make(chan string),
 		},
 	}
 

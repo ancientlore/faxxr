@@ -24,6 +24,7 @@ type faxCoverDetails struct {
 	Quality   string // TODO: Set Quality
 	pdfFile   string
 	faxSID    string
+	created   time.Time
 }
 
 func faxText(pdf *gofpdf.Fpdf, text string, bold bool, size float64) {

@@ -33,6 +33,9 @@ type faxConfig struct {
 
 	// send the SMS phone number where the approval came from to approve a fax.
 	approvalQueue chan string
+
+	// fax SID used to sms user about updates
+	statusQueue chan string
 }
 
 // twilio is a Twilio client.

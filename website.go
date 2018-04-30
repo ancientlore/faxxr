@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/myesui/uuid"
 )
@@ -32,6 +33,7 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var info faxCoverDetails
+	info.created = time.Now()
 	info.FromName = r.FormValue("fromName")
 	info.FromPhone = phoneReplacer.Replace(r.FormValue("fromPhone"))
 	info.FromAddr1 = r.FormValue("fromAddr1")
