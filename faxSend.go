@@ -132,6 +132,7 @@ func (client *twilio) faxLoop(ctx context.Context) {
 		case <-ticker.C:
 			for k, details := range outgoing {
 				if time.Since(details.created) > 30*time.Minute {
+					log.Print("Removing ", details.pdfFile)
 					err := os.Remove("tmp/" + details.pdfFile)
 					if err != nil {
 						log.Print("faxLoop: ", err)

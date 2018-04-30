@@ -39,15 +39,20 @@ func faxText(pdf *gofpdf.Fpdf, text string, bold bool, size float64) {
 }
 
 func faxCover(tmpDir string, details *faxCoverDetails) (string, error) {
-	pdf := gofpdf.New(gofpdf.OrientationPortrait, "pt", "Letter", "")
+	pdf := gofpdf.New("Portrait", "pt", "Letter", "")
 	pdf.SetTitle("Fax", true)
 
 	pdf.AddPage()
 	pdf.SetMargins(72, 72, 72)
 	pdf.SetY(76)
 
+	tzEST, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		tzEST = time.Local
+	}
+
 	faxText(pdf, " FAX", true, 32)
-	faxText(pdf, time.Now().Format(time.RFC850), false, 10)
+	faxText(pdf, time.Now().In(tzEST).Format(time.RFC850), false, 10)
 	faxText(pdf, "\nFROM:", false, 12)
 	faxText(pdf, details.FromName, true, 16)
 	if details.FromAddr1 != "" {
@@ -70,13 +75,18 @@ func faxCover(tmpDir string, details *faxCoverDetails) (string, error) {
 	pdf.Rect(72, 72, 6.5*72, 36, "D")
 
 	fileStr := filepath.Join(tmpDir, uuid.NewV4().String()+".pdf")
-	err := pdf.OutputFileAndClose(fileStr)
+	err = pdf.OutputFileAndClose(fileStr)
 	return fileStr, err
 }
 
 func mergePdfs(tmpDir string, files []string) (string, error) {
 	outfile := filepath.Join(tmpDir, uuid.NewV4().String()+".pdf")
-	_, err := pdfcpu.Process(pdfcpu.MergeCommand(files, outfile, types.NewDefaultConfiguration()))
+	config := types.NewDefaultConfiguration()
+	config.SetValidationRelaxed()
+	config.Reader15 = true
+	config.WriteXRefStream = true
+	config.WriteObjectStream = true
+	_, err := pdfcpu.Process(pdfcpu.MergeCommand(files, outfile, config))
 	// delete old files
 	for _, f := range files {
 		err2 := os.Remove(f)

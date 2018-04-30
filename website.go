@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -87,6 +88,7 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 
 	cover, err := faxCover("tmp", &info)
 	if err != nil {
+		log.Print("fax cover: ", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		os.Remove(fn)
 		return
@@ -94,6 +96,7 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 
 	finalPdf, err := mergePdfs("tmp", []string{cover, fn})
 	if err != nil {
+		log.Print("merge pdf: ", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
