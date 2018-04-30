@@ -152,9 +152,8 @@ func faxMedia(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-type", "application/pdf")
 			w.Write(b)
 			return
-		} else {
-			log.Print("faxMedia: ", err)
 		}
+		log.Print("faxMedia: ", err)
 	}
 
 	http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)

@@ -42,6 +42,7 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 	info.ToPhone = phoneReplacer.Replace(r.FormValue("toPhone"))
 	info.Subject = r.FormValue("subject")
 	info.Text = r.FormValue("text")
+	info.Quality = r.FormValue("quality")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
