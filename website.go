@@ -20,7 +20,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 	templates.ExecuteTemplate(w, "home.html", nil)
 }
 
-var phoneRE = regexp.MustCompile(`^\+\d+`)
+var (
+	phoneRE       = regexp.MustCompile(`^\+\d+$`)
+	phoneReplacer = strings.NewReplacer(" ", "", "-", "", ".", "")
+)
 
 func sendFax(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(64 * 1024 * 1024)
@@ -30,11 +33,11 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 	}
 	var info faxCoverDetails
 	info.FromName = r.FormValue("fromName")
-	info.FromPhone = strings.TrimSpace(r.FormValue("fromPhone"))
+	info.FromPhone = phoneReplacer.Replace(r.FormValue("fromPhone"))
 	info.FromAddr1 = r.FormValue("fromAddr1")
 	info.FromAddr2 = r.FormValue("fromAddr2")
 	info.ToName = r.FormValue("toName")
-	info.ToPhone = strings.TrimSpace(r.FormValue("toPhone"))
+	info.ToPhone = phoneReplacer.Replace(r.FormValue("toPhone"))
 	info.Subject = r.FormValue("subject")
 	info.Text = r.FormValue("text")
 	if err != nil {
@@ -93,6 +96,10 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 		os.Remove(finalPdf)
 		return
 	}
+
+	info.pdfFile = strings.TrimPrefix("tmp/", finalPdf)
+
+	twilioClient.fax.faxQueue <- &info
 
 	templates.ExecuteTemplate(w, "sent.html", nil)
 }

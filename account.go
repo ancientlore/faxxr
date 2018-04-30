@@ -22,8 +22,17 @@ type faxConfig struct {
 	// Status callback URL
 	StatusCallbackURL string
 
+	// Where to load media from
+	MediaURL string
+
 	// Whether to store sent media
 	StoreMedia bool
+
+	// a fax we want to send
+	faxQueue chan *faxCoverDetails
+
+	// send the SMS phone number where the approval came from to approve a fax.
+	approvalQueue chan string
 }
 
 // twilio is a Twilio client.

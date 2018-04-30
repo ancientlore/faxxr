@@ -59,18 +59,26 @@ func main() {
 			From: *flagFrom,
 		},
 		fax: faxConfig{
-			From: *flagFrom,
+			From:          *flagFrom,
+			faxQueue:      make(chan *faxCoverDetails),
+			approvalQueue: make(chan string),
 		},
 	}
 
 	if *flagCallback != "" {
 		twilioClient.sms.StatusCallbackURL = *flagCallback + "/smsStatus"
 		twilioClient.fax.StatusCallbackURL = *flagCallback + "/faxStatus"
+		twilioClient.fax.MediaURL = *flagCallback + "/faxMedia/"
 	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go twilioClient.faxLoop(ctx)
 
 	// web site
 	http.HandleFunc("/", home)
 	http.HandleFunc("/sendFax", sendFax)
+	http.HandleFunc("/faxMedia/", faxMedia)
 	http.Handle("/media/", http.StripPrefix("/media/", http.FileServer(http.Dir("media"))))
 
 	// callbacks
@@ -105,11 +113,9 @@ func main() {
 				log.Print(err)
 			}
 		}
-	}(context.Background())
+	}(ctx)
 
 	log.Print("Starting on ", *flagAddr)
-
-	go doStuff(twilioClient)
 
 	// listen for requests and serve responses.
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -117,25 +123,4 @@ func main() {
 	}
 
 	log.Print("Shutting down")
-}
-
-func doStuff(c *twilio) {
-	time.Sleep(2 * time.Second)
-	/*
-		err := c.sendSMS(*flagTo, "This is a test message. これはテストメッセージです。", "")
-		if err != nil {
-			log.Print(err)
-		}
-
-		faxCover(".", &faxCoverDetails{
-			FromPhone: *flagFrom,
-			FromName:  "Michael Lore",
-			FromAddr1: "1435 Towlston Road",
-			FromAddr2: "Vienna, VA 22182",
-			ToPhone:   *flagTo,
-			ToName:    "Ancient Lore",
-			Subject:   "Interesting information",
-			Text:      "Please look at this fax. This is some interesting stuff. I promise you will want to read it.\n\nSeriously, look at it!",
-		})
-	*/
 }

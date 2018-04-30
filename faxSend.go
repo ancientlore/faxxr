@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -73,7 +76,57 @@ func faxStatusCallback(w http.ResponseWriter, r *http.Request) {
 		log.Print("Unable to parse form: ", err)
 	} else {
 		logFaxStatus(r.PostForm)
+		/*
+			to := r.PostForm.Get("To")
+			from := r.PostForm.Get("From")
+			messageStatus := r.PostForm.Get("MessageStatus")
+			errorCode, _ := strconv.Atoi(r.PostForm.Get("ErrorCode"))
+			err = twilioClient.sendSMS(from, fmt.Sprintf("Fax to %q: %d %v", to, errorCode, messageStatus), "")
+			if err != nil {
+				log.Print("Unable to send SMS notification: ", err)
+			}
+		*/
 	}
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte("OK"))
+}
+
+func (client *twilio) faxLoop(ctx context.Context) {
+	done := ctx.Done()
+	outgoing := make(map[string]*faxCoverDetails)
+	for {
+		select {
+		case <-done:
+			return
+		case details := <-client.fax.faxQueue:
+			outgoing[details.FromPhone] = details
+		case number := <-client.fax.approvalQueue:
+			details, ok := outgoing[number]
+			if ok {
+				err := client.sendFax(details.ToPhone, client.fax.MediaURL+details.pdfFile, details.Quality)
+				if err != nil {
+					log.Print("faxLoop: ", err)
+				}
+			}
+			// TODO: we leave it in the map for now - based on status we need to delete it
+		}
+	}
+}
+
+var reValidFile = regexp.MustCompile(`^tmp/[\-a-zA-Z0-9]+\.pdf$`)
+
+func faxMedia(w http.ResponseWriter, r *http.Request) {
+	fn := "tmp/" + strings.TrimPrefix(r.URL.Path, "/faxMedia/")
+	if reValidFile.MatchString(fn) {
+		b, err := ioutil.ReadFile(fn)
+		if err == nil {
+			w.Header().Set("Content-type", "application/pdf")
+			w.Write(b)
+			return
+		} else {
+			log.Print("faxMedia: ", err)
+		}
+	}
+
+	http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 }
