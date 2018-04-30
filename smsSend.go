@@ -13,6 +13,10 @@ import (
 func (client *twilio) sendSMS(to, body, mediaURL string) error {
 	turl := twilioSMSURL + client.AccountSID + "/Messages.json"
 
+	if !client.isWhitelisted(to) {
+		return fmt.Errorf("The number %q is not whitelisted", to)
+	}
+
 	msgData := url.Values{}
 	msgData.Set("To", to)
 	msgData.Set("From", client.sms.From)

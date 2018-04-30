@@ -109,13 +109,14 @@ func (client *twilio) faxLoop(ctx context.Context) {
 		case number := <-client.fax.approvalQueue:
 			details, ok := outgoing[number]
 			if ok {
-				sid, err := client.sendFax(details.ToPhone, client.fax.MediaURL+details.pdfFile, details.Quality)
-				if err != nil {
-					log.Print("faxLoop: ", err)
+				if client.isWhitelisted(details.FromPhone) {
+					sid, err := client.sendFax(details.ToPhone, client.fax.MediaURL+details.pdfFile, details.Quality)
+					if err != nil {
+						log.Print("faxLoop: ", err)
+					}
+					details.faxSID = sid
 				}
-				details.faxSID = sid
 			}
-			// TODO: we leave it in the map for now - based on status we need to delete it
 		case sidMsg := <-client.fax.statusQueue:
 			if sidMsg != "" {
 				for _, details := range outgoing {

@@ -63,6 +63,11 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "To phone number is not formatted correctly", http.StatusBadRequest)
 		return
 	}
+	if !twilioClient.isWhitelisted(info.FromPhone) {
+		http.Error(w, "From phone number is not whitelisted", http.StatusBadRequest)
+		return
+	}
+
 	f, hdr, err := r.FormFile("mediaFile")
 	defer f.Close()
 	fn := filepath.Join("tmp", uuid.NewV4().String()+".pdf")

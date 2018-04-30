@@ -79,6 +79,10 @@ notify on|off`
 		msg += " Try \"help\" or \"options\" to see what I can do."
 	}
 
+	if !twilioClient.isWhitelisted(r.PostForm.Get("from")) {
+		msg = "Msg&Data rates may apply."
+	}
+
 	w.Header().Set("Content-Type", "application/xml")
 	data := &smsML{
 		Message: &smsMsg{

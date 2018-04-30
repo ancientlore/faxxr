@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"time"
 
@@ -19,12 +20,12 @@ const (
 )
 
 var (
-	flagSID      = flag.String("twilio_sid", "", "Twilio account SID.")
-	flagToken    = flag.String("twilio_token", "", "Twilio authorization token.")
-	flagFrom     = flag.String("from", "+15716205673", "Phone number to send from.")
-	flagAddr     = flag.String("addr", ":9000", "HTTP address to listen on.")
-	flagCallback = flag.String("callback", "http://served.ancientlore.io:9000", "Base URL where callbacks should go.")
-	flagTo       = flag.String("to", "", "Test phone number to send to.")
+	flagSID       = flag.String("twilio_sid", "", "Twilio account SID.")
+	flagToken     = flag.String("twilio_token", "", "Twilio authorization token.")
+	flagFrom      = flag.String("from", "+15716205673", "Phone number to send from.")
+	flagAddr      = flag.String("addr", ":9000", "HTTP address to listen on.")
+	flagCallback  = flag.String("callback", "http://served.ancientlore.io:9000", "Base URL where callbacks should go.")
+	flagWhitelist = flag.String("whitelist", "", "Comma-separated mobile numbers of allowed users.")
 
 	twilioClient *twilio
 
@@ -64,6 +65,7 @@ func main() {
 			approvalQueue: make(chan string),
 			statusQueue:   make(chan string),
 		},
+		whitelist: strings.Split(*flagWhitelist, ","),
 	}
 
 	if *flagCallback != "" {

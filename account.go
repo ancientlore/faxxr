@@ -54,4 +54,16 @@ type twilio struct {
 
 	// fax settings
 	fax faxConfig
+
+	// whitlisted numbers
+	whitelist []string
+}
+
+func (client *twilio) isWhitelisted(number string) bool {
+	for _, v := range client.whitelist {
+		if v == number {
+			return true
+		}
+	}
+	return false
 }
