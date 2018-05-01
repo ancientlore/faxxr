@@ -136,6 +136,16 @@ func (client *twilio) faxLoop(ctx context.Context) {
 					}
 				}
 			}
+		case number := <-client.fax.mediaQueue:
+			details, ok := outgoing[number]
+			msg := "No pending fax."
+			if ok {
+				msg = client.fax.MediaURL + details.pdfFile
+			}
+			err := client.sendSMS(number, msg, "")
+			if err != nil {
+				log.Print("faxLoop: ", err)
+			}
 		case <-ticker.C:
 			for k, details := range outgoing {
 				if time.Since(details.created) > 30*time.Minute {

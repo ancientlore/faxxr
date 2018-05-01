@@ -64,6 +64,7 @@ func main() {
 			faxQueue:      make(chan *faxCoverDetails),
 			approvalQueue: make(chan string),
 			statusQueue:   make(chan string),
+			mediaQueue:    make(chan string),
 		},
 		whitelist: strings.Split(*flagWhitelist, ","),
 	}

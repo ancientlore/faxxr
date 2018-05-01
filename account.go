@@ -36,6 +36,9 @@ type faxConfig struct {
 
 	// fax SID used to sms user about updates
 	statusQueue chan string
+
+	// send the SMS phone number to get the media URL of the current pdf.
+	mediaQueue chan string
 }
 
 // twilio is a Twilio client.
