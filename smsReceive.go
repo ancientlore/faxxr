@@ -59,10 +59,10 @@ media`
 		config.Store("notify", "off")
 		msg = "Fax notifications disabled."
 	case "ok", "approve":
-		msg = "Checking..."
+		msg = ""
 		twilioClient.fax.approvalQueue <- r.PostForm.Get("From")
 	case "url", "media":
-		msg = "Checking..."
+		msg = ""
 		twilioClient.fax.mediaQueue <- r.PostForm.Get("From")
 	default:
 		msgs := []string{
@@ -89,10 +89,11 @@ media`
 	}
 
 	w.Header().Set("Content-Type", "application/xml")
-	data := &smsML{
-		Message: &smsMsg{
+	data := &smsML{}
+	if msg != "" {
+		data.Message = &smsMsg{
 			Body: []string{msg},
-		},
+		}
 	}
 
 	b, err := xml.Marshal(data)
