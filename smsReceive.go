@@ -20,6 +20,8 @@ type smsML struct {
 	Redirect string   `xml:"Redirect,omitempty"`
 }
 
+var msgReplacer = strings.NewReplacer(" ", "", "\t", "", "\r", "", "\n", "")
+
 func smsReceive(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -30,14 +32,13 @@ func smsReceive(w http.ResponseWriter, r *http.Request) {
 	logSmsStatus(r.PostForm)
 
 	msg := ""
-	switch strings.Replace(strings.ToLower(r.PostForm.Get("Body")), " ", "", -1) {
+	switch msgReplacer.Replace(strings.ToLower(r.PostForm.Get("Body"))) {
 	case "help", "options":
 		msg = `Msg&Data rates may apply. faxxr options are:
 help
 options
 settings
 fax enable|disable
-notify on|off
 approve
 media`
 	case "settings":
@@ -52,12 +53,6 @@ media`
 	case "faxdisable", "faxoff":
 		config.Store("fax", "disable")
 		msg = "Receiving faxes disabled."
-	case "notifyenable", "notifyon":
-		config.Store("notify", "on")
-		msg = "Fax notifications enabled."
-	case "notifydisable", "notifyoff":
-		config.Store("notify", "off")
-		msg = "Fax notifications disabled."
 	case "ok", "approve":
 		msg = ""
 		twilioClient.fax.approvalQueue <- r.PostForm.Get("From")
