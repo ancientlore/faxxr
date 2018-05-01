@@ -108,14 +108,21 @@ func (client *twilio) faxLoop(ctx context.Context) {
 			outgoing[details.FromPhone] = details
 		case number := <-client.fax.approvalQueue:
 			details, ok := outgoing[number]
+			msg := "No pending fax."
 			if ok {
+				msg = "Fax approved."
 				if client.isWhitelisted(details.FromPhone) {
 					sid, err := client.sendFax(details.ToPhone, client.fax.MediaURL+details.pdfFile, details.Quality)
 					if err != nil {
 						log.Print("faxLoop: ", err)
+						msg = "Sending failed."
 					}
 					details.faxSID = sid
 				}
+			}
+			err := client.sendSMS(details.FromPhone, msg, "")
+			if err != nil {
+				log.Print("faxLoop: ", err)
 			}
 		case sidMsg := <-client.fax.statusQueue:
 			if sidMsg != "" {

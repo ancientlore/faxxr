@@ -57,7 +57,7 @@ notify on|off`
 		config.Store("notify", "off")
 		msg = "Fax notifications disabled."
 	case "ok":
-		msg = "Cool, sending fax."
+		msg = "Checking..."
 		twilioClient.fax.approvalQueue <- r.PostForm.Get("From")
 	default:
 		msgs := []string{
