@@ -59,11 +59,11 @@ media`
 		config.Store("notify", "off")
 		msg = "Fax notifications disabled."
 	case "ok", "approve":
+		msg = "Checking..."
 		twilioClient.fax.approvalQueue <- r.PostForm.Get("From")
-		return
 	case "url", "media":
+		msg = "Checking..."
 		twilioClient.fax.mediaQueue <- r.PostForm.Get("From")
-		return
 	default:
 		msgs := []string{
 			"Say what?",
