@@ -37,7 +37,8 @@ help
 options
 settings
 fax enable|disable
-notify on|off`
+notify on|off
+approve`
 	case "settings":
 		msg += "faxxr settings:"
 		config.Range(func(k, v interface{}) bool {
@@ -56,7 +57,7 @@ notify on|off`
 	case "notifydisable", "notifyoff":
 		config.Store("notify", "off")
 		msg = "Fax notifications disabled."
-	case "ok":
+	case "ok", "approve":
 		msg = "Checking..."
 		twilioClient.fax.approvalQueue <- r.PostForm.Get("From")
 	default:
