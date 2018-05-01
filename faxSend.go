@@ -120,7 +120,7 @@ func (client *twilio) faxLoop(ctx context.Context) {
 					details.faxSID = sid
 				}
 			}
-			err := client.sendSMS(details.FromPhone, msg, "")
+			err := client.sendSMS(number, msg, "")
 			if err != nil {
 				log.Print("faxLoop: ", err)
 			}
