@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -147,6 +148,7 @@ func (client *twilio) faxLoop(ctx context.Context) {
 				log.Print("faxLoop: ", err)
 			}
 		case <-ticker.C:
+			// remove known things from list
 			for k, details := range outgoing {
 				if time.Since(details.created) > 30*time.Minute {
 					log.Print("Removing ", details.pdfFile)
@@ -155,6 +157,26 @@ func (client *twilio) faxLoop(ctx context.Context) {
 						log.Print("faxLoop: ", err)
 					}
 					delete(outgoing, k)
+				}
+			}
+			// remove any dangling files
+			matches, err := filepath.Glob("tmp/*.pdf")
+			if err != nil {
+				log.Print("faxLoop: ", err)
+			} else {
+				for _, f := range matches {
+					info, err := os.Stat(f)
+					if err != nil {
+						log.Print("faxLoop: ", err)
+					} else {
+						if !info.IsDir() && time.Since(info.ModTime()) > 30*time.Minute {
+							log.Print("Removing ", f)
+							err = os.Remove(f)
+							if err != nil {
+								log.Print("faxLoop: ", err)
+							}
+						}
+					}
 				}
 			}
 		}
