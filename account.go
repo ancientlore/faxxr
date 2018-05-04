@@ -25,6 +25,9 @@ type faxConfig struct {
 	// Where to load media from
 	MediaURL string
 
+	// Where to send incoming fax data
+	IncomingDataURL string
+
 	// Whether to store sent media
 	StoreMedia bool
 

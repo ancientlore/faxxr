@@ -72,6 +72,7 @@ func main() {
 		twilioClient.sms.StatusCallbackURL = *flagCallback + "/smsStatus"
 		twilioClient.fax.StatusCallbackURL = *flagCallback + "/faxStatus"
 		twilioClient.fax.MediaURL = *flagCallback + "/faxMedia/"
+		twilioClient.fax.IncomingDataURL = *flagCallback + "/faxReceiveFile"
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -88,6 +89,8 @@ func main() {
 	http.HandleFunc("/smsStatus", smsStatusCallback)
 	http.HandleFunc("/smsReceive", smsReceive)
 	http.HandleFunc("/faxStatus", faxStatusCallback)
+	http.HandleFunc("/faxReceive", faxReceive)
+	http.HandleFunc("/faxReceiveFile", faxReceiveFile)
 
 	server := &http.Server{
 		Addr:         *flagAddr,
