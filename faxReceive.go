@@ -54,6 +54,9 @@ func faxReceive(w http.ResponseWriter, r *http.Request) {
 	}
 	logFaxStatus(r.PostForm)
 
+	to := r.PostForm.Get("To")
+	from := r.PostForm.Get("From")
+
 	enabled := false
 	if s, ok := config.Load("fax"); ok && s == "enable" {
 		enabled = true
@@ -70,9 +73,17 @@ func faxReceive(w http.ResponseWriter, r *http.Request) {
 			StoreMedia: false,                            // don't store
 		}
 		log.Print("Accepting fax")
+		err = twilioClient.sendSMS(twilioClient.sms.From, fmt.Sprintf("Accepting fax from %q to %q", from, to), "")
+		if err != nil {
+			log.Print(err)
+		}
 	} else {
 		data.Reject = &faxRejectML{}
 		log.Print("Rejecting fax")
+		err = twilioClient.sendSMS(twilioClient.sms.From, fmt.Sprintf("Rejecting fax from %q to %q", from, to), "")
+		if err != nil {
+			log.Print(err)
+		}
 	}
 
 	b, err := xml.Marshal(data)
@@ -87,10 +98,10 @@ func faxReceive(w http.ResponseWriter, r *http.Request) {
 }
 
 func faxReceiveFile(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	err := r.ParseMultipartForm(64 * 1024 * 1024)
 	if err != nil {
 		log.Print("Unable to parse form: ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	logFaxStatus(r.PostForm)
@@ -101,7 +112,7 @@ func faxReceiveFile(w http.ResponseWriter, r *http.Request) {
 	errorMessage := r.PostForm.Get("ErrorMessage")
 
 	if errorCode != 0 {
-		msg := fmt.Sprintf("Failed to receive fax from %q to %q: %d %v ", from, to, errorCode, errorMessage)
+		msg := fmt.Sprintf("Failed to receive fax from %q to %q: %d %v", from, to, errorCode, errorMessage)
 		err = twilioClient.sendSMS(twilioClient.sms.From, msg, "")
 		if err != nil {
 			log.Print("faxReceiveFile: ", err)
