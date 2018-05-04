@@ -92,6 +92,12 @@ media`
 	}
 
 	b, err := xml.Marshal(data)
+	if err != nil {
+		log.Print("Unable to marshal response: ", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.Write([]byte(xml.Header))
 	w.Write(b)
 }

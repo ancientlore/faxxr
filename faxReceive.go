@@ -69,11 +69,19 @@ func faxReceive(w http.ResponseWriter, r *http.Request) {
 			PageSize:   "",                               // default
 			StoreMedia: false,                            // don't store
 		}
+		log.Print("Accepting fax")
 	} else {
 		data.Reject = &faxRejectML{}
+		log.Print("Rejecting fax")
 	}
 
 	b, err := xml.Marshal(data)
+	if err != nil {
+		log.Print("Unable to marshal response: ", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	w.Write([]byte(xml.Header))
 	w.Write(b)
 }
@@ -82,7 +90,7 @@ func faxReceiveFile(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		log.Print("Unable to parse form: ", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	logFaxStatus(r.PostForm)
