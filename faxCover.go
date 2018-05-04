@@ -21,7 +21,8 @@ type faxCoverDetails struct {
 	ToName    string
 	Subject   string
 	Text      string
-	Quality   string // TODO: Set Quality
+	Quality   string
+	ImageFile string // if provided, an extra page with the image is written
 	pdfFile   string
 	faxSID    string
 	created   time.Time
@@ -36,6 +37,24 @@ func faxText(pdf *gofpdf.Fpdf, text string, bold bool, size float64) {
 	pdf.SetX(72)
 	pdf.Write(size+2, text)
 	pdf.Ln(size + 8)
+}
+
+func faxImagePage(pdf *gofpdf.Fpdf, fileName string, x, y, w, h float64) {
+	pdf.AddPage()
+	pdf.ImageOptions(
+		fileName,
+		x,
+		y,
+		w,
+		h,
+		true,
+		gofpdf.ImageOptions{
+			ImageType: "",
+			ReadDpi:   true,
+		},
+		0,
+		"",
+	)
 }
 
 func faxCover(tmpDir string, details *faxCoverDetails) (string, error) {
@@ -73,6 +92,11 @@ func faxCover(tmpDir string, details *faxCoverDetails) (string, error) {
 	faxText(pdf, "\n~ Sent by github.com/ancientlore/faxxr ~", false, 8)
 	pdf.Image("media/m.png", 7*72, 76, 32, 32, false, "", 0, "")
 	pdf.Rect(72, 72, 6.5*72, 36, "D")
+
+	// You can attach an image directly while generating the cover
+	if details.ImageFile != "" {
+		faxImagePage(pdf, details.ImageFile, 72, 72, 6.5*72, 0)
+	}
 
 	fileStr := filepath.Join(tmpDir, uuid.NewV4().String()+".pdf")
 	err = pdf.OutputFileAndClose(fileStr)

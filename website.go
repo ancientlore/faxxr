@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -69,9 +70,16 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Save media file
 	f, hdr, err := r.FormFile("mediaFile")
 	defer f.Close()
-	fn := filepath.Join("tmp", uuid.NewV4().String()+".pdf")
+	ct := hdr.Header.Get("Content-Type")
+	ext, err := mime.ExtensionsByType(ct)
+	if err != nil || len(ext) < 1 {
+		log.Print("Cannot determine file type: ", ct, " assuming PDF")
+		ext = []string{".pdf"}
+	}
+	fn := filepath.Join("tmp", uuid.NewV4().String()+ext[0])
 	destf, err := os.Create(fn)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -86,6 +94,12 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 	}
 	destf.Close()
 
+	// attach file as image if it isn't a pdf
+	if !strings.HasSuffix(fn, ".pdf") {
+		info.ImageFile = fn
+	}
+
+	// make cover
 	cover, err := faxCover("tmp", &info)
 	if err != nil {
 		log.Print("fax cover: ", err)
@@ -94,11 +108,22 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	finalPdf, err := mergePdfs("tmp", []string{cover, fn})
-	if err != nil {
-		log.Print("merge pdf: ", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	var finalPdf string
+
+	if strings.HasSuffix(fn, ".pdf") {
+		// merge the cover and the pdf
+		finalPdf, err = mergePdfs("tmp", []string{cover, fn})
+		if err != nil {
+			log.Print("merge pdf: ", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		finalPdf = cover
+		err = os.Remove(fn)
+		if err != nil {
+			log.Print("removing image: ", err)
+		}
 	}
 
 	err = twilioClient.sendSMS(info.FromPhone, "Reply with OK to approve faxing "+hdr.Filename, "")
