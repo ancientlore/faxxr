@@ -73,3 +73,10 @@ func (client *twilio) isWhitelisted(number string) bool {
 	}
 	return false
 }
+
+func (client *twilio) ownerNumber() string {
+	if len(client.whitelist) > 0 {
+		return client.whitelist[0]
+	}
+	return ""
+}

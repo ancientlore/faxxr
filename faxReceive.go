@@ -73,16 +73,20 @@ func faxReceive(w http.ResponseWriter, r *http.Request) {
 			StoreMedia: false,                            // don't store
 		}
 		log.Print("Accepting fax")
-		err = twilioClient.sendSMS(twilioClient.sms.From, fmt.Sprintf("Accepting fax from %q to %q", from, to), "")
-		if err != nil {
-			log.Print(err)
+		if twilioClient.ownerNumber() != "" {
+			err = twilioClient.sendSMS(twilioClient.ownerNumber(), fmt.Sprintf("Accepting fax from %q to %q", from, to), "")
+			if err != nil {
+				log.Print(err)
+			}
 		}
 	} else {
 		data.Reject = &faxRejectML{}
 		log.Print("Rejecting fax")
-		err = twilioClient.sendSMS(twilioClient.sms.From, fmt.Sprintf("Rejecting fax from %q to %q", from, to), "")
-		if err != nil {
-			log.Print(err)
+		if twilioClient.ownerNumber() != "" {
+			err = twilioClient.sendSMS(twilioClient.ownerNumber(), fmt.Sprintf("Rejecting fax from %q to %q", from, to), "")
+			if err != nil {
+				log.Print(err)
+			}
 		}
 	}
 
@@ -113,9 +117,11 @@ func faxReceiveFile(w http.ResponseWriter, r *http.Request) {
 
 	if errorCode != 0 {
 		msg := fmt.Sprintf("Failed to receive fax from %q to %q: %d %v", from, to, errorCode, errorMessage)
-		err = twilioClient.sendSMS(twilioClient.sms.From, msg, "")
-		if err != nil {
-			log.Print("faxReceiveFile: ", err)
+		if twilioClient.ownerNumber() != "" {
+			err = twilioClient.sendSMS(twilioClient.ownerNumber(), msg, "")
+			if err != nil {
+				log.Print("faxReceiveFile: ", err)
+			}
 		}
 	}
 
@@ -147,9 +153,11 @@ func faxReceiveFile(w http.ResponseWriter, r *http.Request) {
 	destf.Close()
 
 	msg := fmt.Sprintf("Received fax %q from %q to %q: %v (%d pages)", hdr.Filename, from, to, faxStatus, numPages)
-	err = twilioClient.sendSMS(twilioClient.sms.From, msg, "")
-	if err != nil {
-		log.Print("faxReceiveFile: ", err)
+	if twilioClient.ownerNumber() != "" {
+		err = twilioClient.sendSMS(twilioClient.ownerNumber(), msg, "")
+		if err != nil {
+			log.Print("faxReceiveFile: ", err)
+		}
 	}
 
 	w.Header().Set("Content-Type", "text/plain")
