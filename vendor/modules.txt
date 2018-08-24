@@ -1,0 +1,21 @@
+# github.com/facebookgo/flagenv v0.0.0-20160425205200-fcd59fca7456
+github.com/facebookgo/flagenv
+# github.com/hhrutter/pdfcpu v0.1.10
+github.com/hhrutter/pdfcpu
+github.com/hhrutter/pdfcpu/types
+github.com/hhrutter/pdfcpu/attach
+github.com/hhrutter/pdfcpu/crypto
+github.com/hhrutter/pdfcpu/extract
+github.com/hhrutter/pdfcpu/log
+github.com/hhrutter/pdfcpu/merge
+github.com/hhrutter/pdfcpu/optimize
+github.com/hhrutter/pdfcpu/read
+github.com/hhrutter/pdfcpu/validate
+github.com/hhrutter/pdfcpu/write
+github.com/hhrutter/pdfcpu/filter
+# github.com/jung-kurt/gofpdf v1.0.0
+github.com/jung-kurt/gofpdf
+# github.com/myesui/uuid v1.0.0
+github.com/myesui/uuid
+# github.com/pkg/errors v0.8.0
+github.com/pkg/errors
