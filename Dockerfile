@@ -12,4 +12,4 @@ COPY --from=builder /go/src/faxxr/tmp /root/tmp
 EXPOSE 9000/tcp
 WORKDIR /root
 
-CMD ["/root/faxxr"]
+ENTRYPOINT ["/root/faxxr"]
