@@ -3,7 +3,7 @@ WORKDIR /go/src/faxxr
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GO111MODULE=on go install
 
-FROM gcr.io/distroless/base
+FROM gcr.io/distroless/static
 
 COPY --from=builder /go/bin/faxxr /root/faxxr
 COPY --from=builder /go/src/faxxr/media /root/media
