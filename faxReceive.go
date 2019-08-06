@@ -74,7 +74,7 @@ func faxReceive(w http.ResponseWriter, r *http.Request) {
 			PageSize:   "",                               // default
 			StoreMedia: false,                            // don't store
 		}
-		log.Print("Accepting fax")
+		log.Print("Accepting fax from ", from)
 		if twilioClient.ownerNumber() != "" {
 			err = twilioClient.sendSMS(twilioClient.ownerNumber(), fmt.Sprintf("Accepting fax from %q to %q", from, to), "")
 			if err != nil {
@@ -82,10 +82,12 @@ func faxReceive(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	} else {
-		startBlockedLoop.Do(faxBlockedSMSLoop)
+		startBlockedLoop.Do(func() {
+			go faxBlockedSMSLoop()
+		})
 
 		data.Reject = &faxRejectML{}
-		log.Print("Rejecting fax")
+		log.Print("Rejecting fax from ", from)
 		if twilioClient.ownerNumber() != "" {
 			blockedSMS <- blockedFax{from: from, msg: fmt.Sprintf("Rejecting fax from %q to %q", from, to)}
 		}
@@ -176,6 +178,7 @@ var (
 )
 
 func faxBlockedSMSLoop() {
+	log.Print("Starting blocked fax SMS loop")
 	t := time.NewTicker(time.Minute)
 	defer t.Stop()
 	list := make(map[string]time.Time)
@@ -184,6 +187,7 @@ func faxBlockedSMSLoop() {
 		case <-t.C:
 			for n, t := range list {
 				if time.Since(t) > time.Minute*10 {
+					log.Printf("Removed %s from the list", n)
 					delete(list, n)
 				}
 			}
