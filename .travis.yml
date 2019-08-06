@@ -4,7 +4,6 @@ services:
   - docker
 
 go:
-  - 1.12
   - tip
 
 before_install:
@@ -14,8 +13,6 @@ script:
   #- go test -v ./...
   #- go test -v -covermode=count -coverprofile=coverage.out ./...
   #- $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
-  - docker build -t ancientlore/faxxr:${TRAVIS_TAG:-latest} .
-
-deploy:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker build -t ancientlore/faxxr:${TRAVIS_TAG:-latest} .
   - docker push ancientlore/faxxr:${TRAVIS_TAG:-latest}
