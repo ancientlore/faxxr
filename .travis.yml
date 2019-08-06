@@ -4,7 +4,7 @@ services:
   - docker
 
 go:
-  - tip
+  - 1.12.7
 
 before_install:
   #- go get github.com/mattn/goveralls
