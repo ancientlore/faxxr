@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
+	"time"
 
 	"github.com/myesui/uuid"
 )
@@ -80,13 +82,12 @@ func faxReceive(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	} else {
+		startBlockedLoop.Do(faxBlockedSMSLoop)
+
 		data.Reject = &faxRejectML{}
 		log.Print("Rejecting fax")
 		if twilioClient.ownerNumber() != "" {
-			err = twilioClient.sendSMS(twilioClient.ownerNumber(), fmt.Sprintf("Rejecting fax from %q to %q", from, to), "")
-			if err != nil {
-				log.Print(err)
-			}
+			blockedSMS <- blockedFax{from: from, msg: fmt.Sprintf("Rejecting fax from %q to %q", from, to)}
 		}
 	}
 
@@ -162,4 +163,38 @@ func faxReceiveFile(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte("OK"))
+}
+
+type blockedFax struct {
+	from string
+	msg  string
+}
+
+var (
+	blockedSMS       = make(chan blockedFax)
+	startBlockedLoop sync.Once
+)
+
+func faxBlockedSMSLoop() {
+	t := time.NewTicker(time.Minute)
+	defer t.Stop()
+	list := make(map[string]time.Time)
+	for {
+		select {
+		case <-t.C:
+			for n, t := range list {
+				if time.Since(t) > time.Minute*10 {
+					delete(list, n)
+				}
+			}
+		case blocked := <-blockedSMS:
+			if _, ok := list[blocked.from]; !ok {
+				list[blocked.from] = time.Now()
+				err := twilioClient.sendSMS(twilioClient.ownerNumber(), blocked.msg, "")
+				if err != nil {
+					log.Print(err)
+				}
+			}
+		}
+	}
 }
