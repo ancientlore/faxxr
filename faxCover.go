@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/hhrutter/pdfcpu"
-	"github.com/hhrutter/pdfcpu/types"
 	"github.com/jung-kurt/gofpdf"
 	"github.com/myesui/uuid"
+	"github.com/pdfcpu/pdfcpu/pkg/api"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 )
 
 type faxCoverDetails struct {
@@ -105,12 +105,12 @@ func faxCover(tmpDir string, details *faxCoverDetails) (string, error) {
 
 func mergePdfs(tmpDir string, files []string) (string, error) {
 	outfile := filepath.Join(tmpDir, uuid.NewV4().String()+".pdf")
-	config := types.NewDefaultConfiguration()
-	config.SetValidationRelaxed()
+	config := pdfcpu.NewDefaultConfiguration()
+	config.ValidationMode = pdfcpu.ValidationRelaxed
 	config.Reader15 = true
 	config.WriteXRefStream = true
 	config.WriteObjectStream = true
-	_, err := pdfcpu.Process(pdfcpu.MergeCommand(files, outfile, config))
+	err := api.MergeCreateFile(files, outfile, config)
 	// delete old files
 	for _, f := range files {
 		err2 := os.Remove(f)

@@ -1,4 +1,4 @@
-FROM golang:latest as builder
+FROM golang:1.14.4 as builder
 WORKDIR /go/src/faxxr
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GO111MODULE=on go install
