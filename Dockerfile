@@ -5,10 +5,14 @@ RUN CGO_ENABLED=0 GOOS=linux GO111MODULE=on go install
 WORKDIR /go/foo
 RUN echo "root:x:0:0:user:/home:/bin/bash" > passwd && echo "nobody:x:65534:65534:user:/home:/bin/bash" >> passwd
 RUN echo "root:x:0:" > group && echo "nobody:x:65534:" >> group
+RUN mkdir -p /home/.config/pdfcpu/fonts
 
 FROM gcr.io/distroless/static:latest
 COPY --from=builder /go/foo/group /etc/group
 COPY --from=builder /go/foo/passwd /etc/passwd
+
+# needed for pdfcpu
+COPY --from=builder /home/.config /home/.config
 
 COPY --from=builder /go/bin/faxxr /usr/bin/faxxr
 COPY --from=builder /go/src/faxxr/media /faxxr/media
