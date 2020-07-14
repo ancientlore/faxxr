@@ -1,24 +1,19 @@
-FROM golang:1.14.4 as builder
+FROM golang:1.14 as builder
 WORKDIR /go/src/faxxr
 COPY . .
+RUN go version
 RUN CGO_ENABLED=0 GOOS=linux GO111MODULE=on go install
-WORKDIR /go/foo
-RUN echo "root:x:0:0:user:/home:/bin/bash" > passwd && echo "nobody:x:65534:65534:user:/home:/bin/bash" >> passwd
-RUN echo "root:x:0:" > group && echo "nobody:x:65534:" >> group
 RUN mkdir -p /home/.config/pdfcpu/fonts
 
-FROM gcr.io/distroless/static:latest
-COPY --from=builder /go/foo/group /etc/group
-COPY --from=builder /go/foo/passwd /etc/passwd
+FROM gcr.io/distroless/static:nonroot
 
 # needed for pdfcpu
 COPY --from=builder /home/.config /home/.config
 
 COPY --from=builder /go/bin/faxxr /usr/bin/faxxr
 COPY --from=builder /go/src/faxxr/media /faxxr/media
-COPY --from=builder --chown=nobody:nobody /go/src/faxxr/tmp /faxxr/tmp
+COPY --from=builder --chown=nonroot:nonroot /go/src/faxxr/tmp /faxxr/tmp
 
 EXPOSE 9000/tcp
-USER nobody:nobody
 WORKDIR /faxxr
 ENTRYPOINT ["/usr/bin/faxxr"]
