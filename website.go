@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/myesui/uuid"
+	"github.com/google/uuid"
 )
 
 var (
@@ -79,7 +79,7 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 		log.Print("Cannot determine file type: ", ct, " assuming PDF")
 		ext = []string{".pdf"}
 	}
-	fn := filepath.Join("tmp", uuid.NewV4().String()+ext[0])
+	fn := filepath.Join("tmp", uuid.New().String()+ext[0])
 	destf, err := os.Create(fn)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

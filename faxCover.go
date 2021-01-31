@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/jung-kurt/gofpdf"
-	"github.com/myesui/uuid"
+	"github.com/google/uuid"
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 )
@@ -98,13 +98,13 @@ func faxCover(tmpDir string, details *faxCoverDetails) (string, error) {
 		faxImagePage(pdf, details.ImageFile, 72, 72, 6.5*72, 0)
 	}
 
-	fileStr := filepath.Join(tmpDir, uuid.NewV4().String()+".pdf")
+	fileStr := filepath.Join(tmpDir, uuid.New().String()+".pdf")
 	err = pdf.OutputFileAndClose(fileStr)
 	return fileStr, err
 }
 
 func mergePdfs(tmpDir string, files []string) (string, error) {
-	outfile := filepath.Join(tmpDir, uuid.NewV4().String()+".pdf")
+	outfile := filepath.Join(tmpDir, uuid.New().String()+".pdf")
 	config := pdfcpu.NewDefaultConfiguration()
 	config.ValidationMode = pdfcpu.ValidationRelaxed
 	config.Reader15 = true
