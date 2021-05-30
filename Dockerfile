@@ -5,7 +5,7 @@ RUN go version
 RUN CGO_ENABLED=0 GOOS=linux GO111MODULE=on go install
 RUN mkdir -p /home/.config/pdfcpu/fonts
 
-FROM gcr.io/distroless/static:nonroot
+FROM ancientlore/goimg:latest
 
 # needed for pdfcpu
 COPY --from=builder /home/.config /home/.config
