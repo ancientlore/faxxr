@@ -8,7 +8,7 @@ require (
 	github.com/facebookgo/subset v0.0.0-20200203212716-c811ad88dec4 // indirect
 	github.com/google/uuid v1.2.0
 	github.com/jung-kurt/gofpdf v1.16.2
-	github.com/pdfcpu/pdfcpu v0.3.8
+	github.com/pdfcpu/pdfcpu v0.3.11
 )
 
 go 1.14
