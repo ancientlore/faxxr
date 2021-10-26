@@ -94,9 +94,8 @@ func main() {
 
 	server := &http.Server{
 		Addr:         *flagAddr,
-		Handler:      http.DefaultServeMux,
-		ReadTimeout:  10 * time.Second, // Time to read the request
-		WriteTimeout: 10 * time.Second, // Time to write the response
+		ReadTimeout:  15 * time.Second, // Time to read the request
+		WriteTimeout: 15 * time.Second, // Time to write the response
 	}
 
 	// Handle graceful shutdown
