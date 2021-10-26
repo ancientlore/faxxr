@@ -20,7 +20,10 @@ var (
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
-	templates.ExecuteTemplate(w, "home.html", nil)
+	err := templates.ExecuteTemplate(w, "home.html", nil)
+	if err != nil {
+		log.Printf("home: %s", err)
+	}
 }
 
 var (
@@ -31,6 +34,7 @@ var (
 func sendFax(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(64 * 1024 * 1024)
 	if err != nil {
+		log.Printf("sendFax: %s", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -66,17 +70,23 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !twilioClient.isWhitelisted(info.FromPhone) {
+		log.Printf("sendFax: phone not whitelisted: %s", info.FromPhone)
 		http.Error(w, "From phone number is not whitelisted", http.StatusBadRequest)
 		return
 	}
 
 	// Save media file
 	f, hdr, err := r.FormFile("mediaFile")
+	if err != nil {
+		log.Printf("sendFax: %s", err)
+		http.Error(w, "Cannot read media file", http.StatusBadRequest)
+		return
+	}
 	defer f.Close()
 	ct := hdr.Header.Get("Content-Type")
 	ext, err := mime.ExtensionsByType(ct)
 	if err != nil || len(ext) < 1 {
-		log.Print("Cannot determine file type: ", ct, " assuming PDF")
+		log.Print("sendFax: Cannot determine file type: ", ct, " assuming PDF")
 		ext = []string{".pdf"}
 	}
 	fn := filepath.Join("tmp", uuid.New().String()+ext[0])
@@ -102,7 +112,7 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 	// make cover
 	cover, err := faxCover("tmp", &info)
 	if err != nil {
-		log.Print("fax cover: ", err)
+		log.Print("sendFax: fax cover: ", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		os.Remove(fn)
 		return
@@ -114,7 +124,7 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 		// merge the cover and the pdf
 		finalPdf, err = mergePdfs("tmp", []string{cover, fn})
 		if err != nil {
-			log.Print("merge pdf: ", err)
+			log.Print("sendFax: merge pdf: ", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -122,12 +132,13 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 		finalPdf = cover
 		err = os.Remove(fn)
 		if err != nil {
-			log.Print("removing image: ", err)
+			log.Print("sendFax: removing image: ", err)
 		}
 	}
 
 	err = twilioClient.sendSMS(info.FromPhone, "Reply with OK to approve faxing "+hdr.Filename, "")
 	if err != nil {
+		log.Print("sendFax: send SMS: ", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		os.Remove(finalPdf)
 		return
@@ -137,5 +148,8 @@ func sendFax(w http.ResponseWriter, r *http.Request) {
 
 	twilioClient.fax.faxQueue <- &info
 
-	templates.ExecuteTemplate(w, "sent.html", nil)
+	err = templates.ExecuteTemplate(w, "sent.html", nil)
+	if err != nil {
+		log.Printf("sendFax: %s", err)
+	}
 }

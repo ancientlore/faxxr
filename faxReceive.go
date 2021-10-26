@@ -50,7 +50,7 @@ type faxML struct {
 func faxReceive(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		log.Print("Unable to parse form: ", err)
+		log.Print("faxReceive: Unable to parse form: ", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -74,11 +74,11 @@ func faxReceive(w http.ResponseWriter, r *http.Request) {
 			PageSize:   "",                               // default
 			StoreMedia: false,                            // don't store
 		}
-		log.Print("Accepting fax from ", from)
+		log.Print("faxReceive: Accepting fax from ", from)
 		if twilioClient.ownerNumber() != "" {
 			err = twilioClient.sendSMS(twilioClient.ownerNumber(), fmt.Sprintf("Accepting fax from %q to %q", from, to), "")
 			if err != nil {
-				log.Print(err)
+				log.Print("faxReceive: ", err)
 			}
 		}
 	} else {
@@ -87,7 +87,7 @@ func faxReceive(w http.ResponseWriter, r *http.Request) {
 		})
 
 		data.Reject = &faxRejectML{}
-		log.Print("Rejecting fax from ", from)
+		log.Print("faxReceive: Rejecting fax from ", from)
 		if twilioClient.ownerNumber() != "" {
 			blockedSMS <- blockedFax{from: from, msg: fmt.Sprintf("Rejecting fax from %q to %q", from, to)}
 		}
@@ -95,7 +95,7 @@ func faxReceive(w http.ResponseWriter, r *http.Request) {
 
 	b, err := xml.Marshal(data)
 	if err != nil {
-		log.Print("Unable to marshal response: ", err)
+		log.Print("faxReceive: Unable to marshal response: ", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -107,7 +107,7 @@ func faxReceive(w http.ResponseWriter, r *http.Request) {
 func faxReceiveFile(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(64 * 1024 * 1024)
 	if err != nil {
-		log.Print("Unable to parse form: ", err)
+		log.Print("faxReceiveFile: Unable to parse form: ", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -137,17 +137,19 @@ func faxReceiveFile(w http.ResponseWriter, r *http.Request) {
 	ct := hdr.Header.Get("Content-Type")
 	ext, err := mime.ExtensionsByType(ct)
 	if err != nil || len(ext) < 1 {
-		log.Print("Cannot determine file type: ", ct, " assuming PDF")
+		log.Print("faxReceiveFile: Cannot determine file type: ", ct, " assuming PDF")
 		ext = []string{".pdf"}
 	}
 	fn := filepath.Join("tmp", uuid.New().String()+ext[0])
 	destf, err := os.Create(fn)
 	if err != nil {
+		log.Printf("faxReceiveFile: %s", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	_, err = io.Copy(destf, f)
 	if err != nil {
+		log.Printf("faxReceiveFile: %s", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		destf.Close()
 		os.Remove(fn)
@@ -187,7 +189,7 @@ func faxBlockedSMSLoop() {
 		case <-t.C:
 			for n, t := range list {
 				if time.Since(t) > time.Minute*10 {
-					log.Printf("Removed %s from the list", n)
+					log.Printf("faxBlockedSMSLoop: Removed %s from the list", n)
 					delete(list, n)
 				}
 			}
@@ -196,7 +198,7 @@ func faxBlockedSMSLoop() {
 				list[blocked.from] = time.Now()
 				err := twilioClient.sendSMS(twilioClient.ownerNumber(), blocked.msg, "")
 				if err != nil {
-					log.Print(err)
+					log.Print("faxBlockedSMSLoop: ", err)
 				}
 			}
 		}

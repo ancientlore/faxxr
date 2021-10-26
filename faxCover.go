@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/jung-kurt/gofpdf"
 	"github.com/google/uuid"
+	"github.com/jung-kurt/gofpdf"
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 )
@@ -115,7 +115,7 @@ func mergePdfs(tmpDir string, files []string) (string, error) {
 	for _, f := range files {
 		err2 := os.Remove(f)
 		if err2 != nil {
-			log.Print(err2)
+			log.Print("mergePdfs: ", err2)
 		}
 	}
 	return outfile, err

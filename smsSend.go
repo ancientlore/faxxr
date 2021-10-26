@@ -14,7 +14,7 @@ func (client *twilio) sendSMS(to, body, mediaURL string) error {
 	turl := twilioSMSURL + client.AccountSID + "/Messages.json"
 
 	if !client.isWhitelisted(to) {
-		return fmt.Errorf("The number %q is not whitelisted", to)
+		return fmt.Errorf("sendSMS: the number %q is not whitelisted", to)
 	}
 
 	msgData := url.Values{}
@@ -48,16 +48,16 @@ func (client *twilio) sendSMS(to, body, mediaURL string) error {
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(&data)
 	if err != nil {
-		log.Print("Unable to decode JSON response: ", err)
+		log.Print("sendSMS: Unable to decode JSON response: ", err)
 		return err
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		err = fmt.Errorf("Message from %q to %q: Send: HTTP %d: %v %v", client.sms.From, to, resp.StatusCode, data["code"], data["message"])
+		err = fmt.Errorf("sendSMS: message from %q to %q: Send: HTTP %d: %v %v", client.sms.From, to, resp.StatusCode, data["code"], data["message"])
 		return err
 	}
 
-	log.Printf("Message from %q to %q: %v", client.sms.From, to, data["status"])
+	log.Printf("sendSMS: Message from %q to %q: %v", client.sms.From, to, data["status"])
 
 	return nil
 }
@@ -84,13 +84,13 @@ func logSmsStatus(v url.Values) {
 	}
 
 	errorCode, _ := strconv.Atoi(v.Get("ErrorCode"))
-	log.Printf("Message from %q%s to %q: %d %s", from, where, to, errorCode, messageStatus)
+	log.Printf("logSmsStatus: Message from %q%s to %q: %d %s", from, where, to, errorCode, messageStatus)
 }
 
 func smsStatusCallback(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		log.Print("Unable to parse form: ", err)
+		log.Print("smsStatusCallback: Unable to parse form: ", err)
 	} else {
 		logSmsStatus(r.PostForm)
 	}

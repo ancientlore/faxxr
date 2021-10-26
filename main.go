@@ -107,7 +107,7 @@ func main() {
 		select {
 		case <-done:
 		case sig := <-stop:
-			log.Print("Received signal ", sig.String())
+			log.Print("main: Received signal ", sig.String())
 			d := time.Second * 5
 			if sig == os.Kill {
 				d = time.Second * 15
@@ -116,17 +116,17 @@ func main() {
 			defer cancel()
 			err := server.Shutdown(wait)
 			if err != nil {
-				log.Print(err)
+				log.Print("main: ", err)
 			}
 		}
 	}(ctx)
 
-	log.Print("Starting on ", *flagAddr)
+	log.Print("main: Starting on ", *flagAddr)
 
 	// listen for requests and serve responses.
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 
-	log.Print("Shutting down")
+	log.Print("main: Shutting down")
 }

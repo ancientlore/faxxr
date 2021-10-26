@@ -51,16 +51,16 @@ func (client *twilio) sendFax(to, mediaURL, quality string) (string, error) {
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(&data)
 	if err != nil {
-		log.Print("Unable to decode JSON response: ", err)
+		log.Print("sendFax: Unable to decode JSON response: ", err)
 		return "", err
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		err = fmt.Errorf("Fax from %q to %q: Send: HTTP %d: %v %v", client.sms.From, to, resp.StatusCode, data["code"], data["message"])
+		err = fmt.Errorf("sendFax: fax from %q to %q: Send: HTTP %d: %v %v", client.sms.From, to, resp.StatusCode, data["code"], data["message"])
 		return "", err
 	}
 
-	log.Printf("Fax from %q to %q: %v", client.sms.From, to, data["status"])
+	log.Printf("sendFax: Fax from %q to %q: %v", client.sms.From, to, data["status"])
 	//log.Print(data)
 	return fmt.Sprint(data["sid"]), nil
 }
@@ -71,13 +71,13 @@ func logFaxStatus(v url.Values) {
 	messageStatus := v.Get("MessageStatus")
 	errorCode, _ := strconv.Atoi(v.Get("ErrorCode"))
 	errorMessage := v.Get("ErrorMessage")
-	log.Printf("Fax from %q to %q: %d %s %v", from, to, errorCode, messageStatus, errorMessage)
+	log.Printf("logFaxStatus: Fax from %q to %q: %d %s %v", from, to, errorCode, messageStatus, errorMessage)
 }
 
 func faxStatusCallback(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		log.Print("Unable to parse form: ", err)
+		log.Print("faxStatusCallback: Unable to parse form: ", err)
 	} else {
 		logFaxStatus(r.PostForm)
 		sid := r.PostForm.Get("FaxSid")
@@ -151,7 +151,7 @@ func (client *twilio) faxLoop(ctx context.Context) {
 			// remove known things from list
 			for k, details := range outgoing {
 				if time.Since(details.created) > 30*time.Minute {
-					log.Print("Removing ", details.pdfFile)
+					log.Print("faxLoop: Removing ", details.pdfFile)
 					err := os.Remove("tmp/" + details.pdfFile)
 					if err != nil {
 						log.Print("faxLoop: ", err)
@@ -170,7 +170,7 @@ func (client *twilio) faxLoop(ctx context.Context) {
 						log.Print("faxLoop: ", err)
 					} else {
 						if !info.IsDir() && time.Since(info.ModTime()) > 30*time.Minute {
-							log.Print("Removing ", f)
+							log.Print("faxLoop: Removing ", f)
 							err = os.Remove(f)
 							if err != nil {
 								log.Print("faxLoop: ", err)
@@ -195,7 +195,8 @@ func faxMedia(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Print("faxMedia: ", err)
+	} else {
+		log.Printf("faxMedia: Invalid file: %q", fn)
 	}
-
 	http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 }

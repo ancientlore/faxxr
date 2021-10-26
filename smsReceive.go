@@ -25,7 +25,7 @@ var msgReplacer = strings.NewReplacer(" ", "", "\t", "", "\r", "", "\n", "")
 func smsReceive(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		log.Print("Unable to parse form: ", err)
+		log.Print("smsReceive: Unable to parse form: ", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -93,7 +93,7 @@ media`
 
 	b, err := xml.Marshal(data)
 	if err != nil {
-		log.Print("Unable to marshal response: ", err)
+		log.Print("smsReceive: Unable to marshal response: ", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
