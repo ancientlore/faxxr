@@ -10,8 +10,8 @@ github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 h1:JWuenKqqX8nojt
 github.com/facebookgo/stack v0.0.0-20160209184415-751773369052/go.mod h1:UbMTZqLaRiH3MsBH8va0n7s1pQYcu3uTb8G4tygF4Zg=
 github.com/facebookgo/subset v0.0.0-20200203212716-c811ad88dec4 h1:7HZCaLC5+BZpmbhCOZJ293Lz68O7PYrF2EzeiFMwCLk=
 github.com/facebookgo/subset v0.0.0-20200203212716-c811ad88dec4/go.mod h1:5tD+neXqOorC30/tWg0LCSkrqj/AR6gu8yY8/fpw1q0=
-github.com/google/uuid v1.3.1 h1:KjJaJ9iWZ3jOFZIf1Lqf4laDRCasjl0BCmnEGxkdLb4=
-github.com/google/uuid v1.3.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/google/uuid v1.4.0 h1:MtMxsa51/r9yyhkyLsVeVt0B+BGQZzpQiTQ4eHZ8bc4=
+github.com/google/uuid v1.4.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/hhrutter/lzw v0.0.0-20190827003112-58b82c5a41cc/go.mod h1:yJBvOcu1wLQ9q9XZmfiPfur+3dQJuIhYQsMGLYcItZk=
 github.com/hhrutter/lzw v0.0.0-20190829144645-6f07a24e8650 h1:1yY/RQWNSBjJe2GDCIYoLmpWVidrooriUr4QS/zaATQ=
 github.com/hhrutter/lzw v0.0.0-20190829144645-6f07a24e8650/go.mod h1:yJBvOcu1wLQ9q9XZmfiPfur+3dQJuIhYQsMGLYcItZk=
